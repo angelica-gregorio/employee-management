@@ -4,6 +4,8 @@ $username   = "root";
 $password   = ""; // no password in XAMPP
 $dbname     = "act01";
 
+session_start(); 
+
 // Connect to MySQL
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -21,7 +23,14 @@ if (isset($_POST["add"])) {
 
     $sql = "INSERT INTO employeedetails (FirstName, LastName, ShiftDate, ShiftNo, Hours, DutyType)
             VALUES ('$firstName', '$lastName', '$shiftDate', '$shiftNo', '$hours', '$dutyType')";
-    $conn->query(query: $sql);
+    
+    if ($conn->query($sql)) {
+        $_SESSION['toast'] = "Employee added successfully!";
+    } else {
+        $_SESSION['toast'] = "❌ Error adding employee!";
+    }
+    header("Location: " . $_SERVER['PHP_SELF']); // refresh to show toast
+    exit;
 }
 
 // Update Employee
@@ -38,31 +47,6 @@ if (isset($_POST["update"])) {
             SET FirstName='$firstName', LastName='$lastName', ShiftDate='$shiftDate',
                 ShiftNo='$shiftNo', Hours='$hours', DutyType='$dutyType'
             WHERE DataEntryID='$id'";
-    $conn->query($sql);
-}
-
-// Delete Employee
-if (isset($_POST["delete"])) {
-    $id = $_POST["id"];
-    $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
-    $conn->query($sql);
-}
-
-session_start(); // at the top of your file
-
-// Insert New Employee Noitification 
-if (isset($_POST["add"])) {
-    if ($conn->query($sql)) {
-        $_SESSION['toast'] = "Employee added successfully!";
-    } else {
-        $_SESSION['toast'] = "❌ Error adding employee!";
-    }
-    header("Location: " . $_SERVER['PHP_SELF']); // refresh to show toast
-    exit;
-}
-
-// Update Employee Notification 
-if (isset($_POST["update"])) {
     if ($conn->query($sql)) {
         $_SESSION['toast'] = "Employee updated successfully!";
     } else {
@@ -72,8 +56,10 @@ if (isset($_POST["update"])) {
     exit;
 }
 
-// Delete Employee Notification
+// Delete Employee
 if (isset($_POST["delete"])) {
+    $id = $_POST["id"];
+    $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
     if ($conn->query($sql)) {
         $_SESSION['toast'] = "Employee deleted successfully!";
     } else {
@@ -82,6 +68,7 @@ if (isset($_POST["delete"])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
+
 
 
 // Search Query
