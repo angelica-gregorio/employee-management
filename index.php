@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username   = "root";
 $password   = ""; // no password in XAMPP
-$dbname     = "employeedetails";
+$dbname     = "act01";
 
 // Connect to MySQL
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -74,8 +74,29 @@ if (!empty($where)) {
     $sql_filtered .= " WHERE " . implode(" AND ", $where);
 }
 
-$result_all = $conn->query($sql_all);
+$result_all = null; // default hidden
+if (isset($_POST["view_all"])) {
+    $result_all = $conn->query($sql_all);
+}
+
 $result_filtered = $conn->query($sql_filtered);
+
+// when show all button is clicked
+$show_all = false; // default is filtered employees
+
+if (isset($_POST["view_all"])) {
+    $show_all = true;
+}
+
+// Run queries conditionally
+if ($show_all) {
+    $result_all = $conn->query($sql_all);
+    $result_filtered = null; // disable filtered
+} else {
+    $result_filtered = $conn->query($sql_filtered);
+    $result_all = null; // disable all
+}
+
 
 // Export CSV (Filtered or All)
 if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
@@ -128,6 +149,8 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
         }
     </style>
 </head>
+
+<!-- BODY -->
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-dark mb-4">
@@ -135,6 +158,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             <span class="navbar-brand mb-0 h1">Employee Management System</span>
         </div>
     </nav>
+
 
     <div class="container">
         <div class="row g-4 mb-4">
@@ -153,7 +177,15 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                             <option value="Late">Late</option>
                             <option value="Overtime">Overtime</option>
                         </select>
-                        <button type="submit" name="add" class="btn btn-success btn-custom w-100">➕ Add</button>
+                        <button type="submit" name="add" class="btn btn-success btn-custom w-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" class="me-1 align-text-bottom">
+                                <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+                                <rect width="36" height="36" x="5" y="7" rx="3"/>
+                                <path stroke-linecap="round" d="M24 16v16m-8-8h16"/>
+                                </g>
+                            </svg>
+                            Add
+                        </button>
                     </form>
                 </div>
             </div>
@@ -174,7 +206,10 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                             <option value="Late">Late</option>
                             <option value="Overtime">Overtime</option>
                         </select>
-                        <button type="submit" name="update" class="btn btn-primary btn-custom w-100">✏️ Update</button>
+                        <button type="submit" name="update"  class="btn btn-primary btn-custom w-100 d-flex align-items-center justify-content-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2"><path fill="#ffffff" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1c-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29c-3.51 3.48-9.21 3.48-12.72 0c-3.5-3.47-3.53-9.11-.02-12.58s9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08l-.72 1.21L11 13V8h1.5z"/></svg>
+                             Update
+                        </button>
                     </form>
                 </div>
             </div>
@@ -185,33 +220,83 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                     <h5>Delete Employee</h5>
                     <form method="post">
                         <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required>
-                        <button type="submit" name="delete" class="btn btn-danger btn-custom w-100">🗑 Delete</button>
+                        <button type="submit" name="delete" class="btn btn-danger btn-custom w-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2 align-text-bottom">
+                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                                <path d="M5.47 6.015v12.514a2.72 2.72 0 0 0 2.721 2.721h7.618a2.72 2.72 0 0 0 2.72-2.72V6.014m-15.235.001h17.412"/>
+                                <path d="M8.735 6.015V4.382a1.632 1.632 0 0 1 1.633-1.632h3.264a1.632 1.632 0 0 1 1.633 1.632v1.633M9.824 16.992v-5.439m4.353 5.439v-5.439"/>
+                            </g>
+                        </svg>
+                            Delete
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
 
         <!-- Search Bar -->
-        <div class="card p-3 mb-4">
+        <div class="card p-3 mb-4 w-100">
             <h5>Search Employees</h5>
             <form method="post" class="row g-3 align-items-center">
-                <div class="col-md-3">
-                    <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+                <div class="d-flex justify-content-center gap-2">
+                    <div class="col-md-3">
+                        <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="shift_date" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="shift_no" class="form-control" placeholder="Shift No">
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <input type="date" name="shift_date" class="form-control">
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="shift_no" class="form-control" placeholder="Shift No">
-                </div>
-                <div class="col-md-4 text-end">
-                    <button type="submit" class="btn btn-dark btn-custom">🔍 Search</button>
-                    <button type="submit" name="export_filtered" class="btn btn-warning btn-custom">Export Filtered</button>
-                    <button type="submit" name="export_all" class="btn btn-secondary btn-custom">Export All</button>
+                <div class="col-md-12 text-end">
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="submit" class="btn btn-dark btn-custom">🔍 Search</button>
+                        <button type="submit" name="export_filtered" class="btn btn-warning btn-custom">Export Filtered</button>
+                        <button type="submit" name="export_all" class="btn btn-secondary btn-custom">Export All</button>
+                        <button type="submit" name="view_all" class="btn btn-info btn-custom">View All</button>
+                    </div>
                 </div>
             </form>
         </div>
 
+<?php if ($show_all) { ?>
+        <!-- All Employees -->
+        <h4>All Employees</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First</th>
+                        <th>Last</th>
+                        <th>Shift Date</th>
+                        <th>Shift No</th>
+                        <th>Hours</th>
+                        <th>Duty Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($result_all && $result_all->num_rows > 0) { ?>
+                        <?php while ($row = $result_all->fetch_assoc()) { ?>
+                        <tr>
+                            <td><?= $row["DataEntryID"] ?></td>
+                            <td><?= $row["FirstName"] ?></td>
+                            <td><?= $row["LastName"] ?></td>
+                            <td><?= $row["ShiftDate"] ?></td>
+                            <td><?= $row["ShiftNo"] ?></td>
+                            <td><?= $row["Hours"] ?></td>
+                            <td><?= $row["DutyType"] ?></td>
+                        </tr>
+                        <?php } ?>
+                    <?php } 
+                    else { ?>
+                        <tr><td colspan="7" class="text-center text-muted">No records found</td></tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    <?php } else { ?>
         <!-- Filtered Employees -->
         <h4>Filtered Employees</h4>
         <div class="table-responsive mb-4">
@@ -246,44 +331,25 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                 </tbody>
             </table>
         </div>
+<?php } ?>
 
-        <!-- All Employees -->
-        <h4>All Employees</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>First</th>
-                        <th>Last</th>
-                        <th>Shift Date</th>
-                        <th>Shift No</th>
-                        <th>Hours</th>
-                        <th>Duty Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($result_all && $result_all->num_rows > 0) { ?>
-                        <?php while ($row = $result_all->fetch_assoc()) { ?>
-                        <tr>
-                            <td><?= $row["DataEntryID"] ?></td>
-                            <td><?= $row["FirstName"] ?></td>
-                            <td><?= $row["LastName"] ?></td>
-                            <td><?= $row["ShiftDate"] ?></td>
-                            <td><?= $row["ShiftNo"] ?></td>
-                            <td><?= $row["Hours"] ?></td>
-                            <td><?= $row["DutyType"] ?></td>
-                        </tr>
-                        <?php } ?>
-                    <?php } else { ?>
-                        <tr><td colspan="7" class="text-center text-muted">No records found</td></tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<script>
+  // Save scroll position before unloading
+  window.addEventListener("beforeunload", function () {
+    localStorage.setItem("scrollPosition", window.scrollY);
+  });
+
+  // Restore scroll position when page loads
+  window.addEventListener("load", function () {
+    let scrollPosition = localStorage.getItem("scrollPosition");
+    if (scrollPosition) {
+      window.scrollTo(0, parseInt(scrollPosition));
+    }
+  });
+</script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<!-- END OF BODY -->
 </html>
