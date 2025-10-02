@@ -48,6 +48,42 @@ if (isset($_POST["delete"])) {
     $conn->query($sql);
 }
 
+session_start(); // at the top of your file
+
+// Insert New Employee Noitification 
+if (isset($_POST["add"])) {
+    if ($conn->query($sql)) {
+        $_SESSION['toast'] = "Employee added successfully!";
+    } else {
+        $_SESSION['toast'] = "❌ Error adding employee!";
+    }
+    header("Location: " . $_SERVER['PHP_SELF']); // refresh to show toast
+    exit;
+}
+
+// Update Employee Notification 
+if (isset($_POST["update"])) {
+    if ($conn->query($sql)) {
+        $_SESSION['toast'] = "Employee updated successfully!";
+    } else {
+        $_SESSION['toast'] = "❌ Error updating employee!";
+    }
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// Delete Employee Notification
+if (isset($_POST["delete"])) {
+    if ($conn->query($sql)) {
+        $_SESSION['toast'] = "Employee deleted successfully!";
+    } else {
+        $_SESSION['toast'] = "❌ Error deleting employee!";
+    }
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+
 // Search Query
 $where = [];
 
@@ -128,34 +164,56 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     <title>Employee Management</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap" rel="stylesheet">
     <style>
         body {
             background: #f8f9fa;
+            font-family: 'DM Sans', sans-serif;
         }
         .card {
             box-shadow: 0 4px 8px rgba(0,0,0,0.08);
             border-radius: 12px;
         }
         table th {
-            background: #006d77 !important;
+            background: #ed6c24 !important;
             color: #fff;
             position: sticky;
             top: 0;
             z-index: 2;
         }
         .btn-custom {
-            border-radius: 6px;
-            font-weight: 500;
+            border-radius: 20px;
+            font-weight: bold;
         }
+        .title-font {
+            font-family: 'Cal Sans', sans-serif; 
+        }
+        
+        .btn-orange {
+            background-color: #f89d32;
+            border-color: #f89d32;
+            color: white; /* optional, ensures text is visible */
+        }
+
+        .btn-orange:hover {
+            background-color: #d37211ff; /* slightly darker on hover */
+            border-color: #f89d32;
+        }   
+
     </style>
 </head>
 
 <!-- BODY -->
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-dark mb-4" style="background-color: #f26922;">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Employee Management System</span>
+            <span class="navbar-brand mb-0 h1 fw-bold title-font">EMPLOYEE  MANAGEMENT  SYSTEM</span>
         </div>
     </nav>
 
@@ -163,9 +221,9 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     <div class="container">
         <div class="row g-4 mb-4">
             <!-- Add Employee -->
-            <div class="col-md-4">
-                <div class="card p-3">
-                    <h5>Add Employee</h5>
+            <div class="col-md-4" >
+                <div class="card p-3" >
+                    <h5 class="fw-bold">Add Employee</h5>
                     <form method="post">
                         <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
                         <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required>
@@ -193,7 +251,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             <!-- Update Employee -->
             <div class="col-md-4">
                 <div class="card p-3">
-                    <h5>Update Employee</h5>
+                    <h5 class="fw-bold">Update Employee</h5>
                     <form method="post">
                         <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required>
                         <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
@@ -206,7 +264,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                             <option value="Late">Late</option>
                             <option value="Overtime">Overtime</option>
                         </select>
-                        <button type="submit" name="update"  class="btn btn-primary btn-custom w-100 d-flex align-items-center justify-content-center">
+                        <button type="submit" name="update"  class="btn btn-orange btn-custom w-100 d-flex align-items-center justify-content-center"  style="background-color: #f89d32; border-color: #f89d32;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2"><path fill="#ffffff" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1c-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29c-3.51 3.48-9.21 3.48-12.72 0c-3.5-3.47-3.53-9.11-.02-12.58s9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08l-.72 1.21L11 13V8h1.5z"/></svg>
                              Update
                         </button>
@@ -217,7 +275,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             <!-- Delete Employee -->
             <div class="col-md-4">
                 <div class="card p-3">
-                    <h5>Delete Employee</h5>
+                    <h5 class="fw-bold">Delete Employee</h5>
                     <form method="post">
                         <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required>
                         <button type="submit" name="delete" class="btn btn-danger btn-custom w-100">
@@ -236,7 +294,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
         <!-- Search Bar -->
         <div class="card p-3 mb-4 w-100">
-            <h5>Search Employees</h5>
+            <h5 class="fw-bold">Search Employees</h5>
             <form method="post" class="row g-3 align-items-center">
                 <div class="d-flex justify-content-center gap-2">
                     <div class="col-md-3">
@@ -262,7 +320,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
 <?php if ($show_all) { ?>
         <!-- All Employees -->
-        <h4>All Employees</h4>
+        <h4 class="fw-bold">All Employees</h4>
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
                 <thead>
@@ -297,8 +355,10 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             </table>
         </div>
     <?php } else { ?>
+
+
         <!-- Filtered Employees -->
-        <h4>Filtered Employees</h4>
+        <h4 class="fw-bold">Filtered Employees</h4>
         <div class="table-responsive mb-4">
             <table class="table table-striped table-hover align-middle">
                 <thead>
@@ -332,6 +392,21 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             </table>
         </div>
 <?php } ?>
+
+<!-- Toast Container for Notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <?php if (isset($_SESSION['toast'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast']; ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast']); ?>
+  <?php endif; ?>
+</div>
 
 <script>
   // Save scroll position before unloading
