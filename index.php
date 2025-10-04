@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username   = "root";
 $password   = ""; // no password in XAMPP
-$dbname     = "act01";
+$dbname     = "employeedetails";
 
 session_start(); 
 
@@ -159,140 +159,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: #ece7e8;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .card {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-            border-radius: 12px;
-            max-width: 1100px;     
-            margin: 50px auto; 
-        }
-
-        .table-container th{
-            background: #204f2b ;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        .table-container{
-            max-width: 1100px;     
-            margin: 10px auto;
-        }
-        .form-control{
-            background: rgba(255, 254, 254, 0.27);
-            border: none;
-        }
-        .form-control:focus {
-            background: rgba(255, 254, 254, 0.27); /* same as default */
-            outline: none;                         /* removes blue outline */
-            box-shadow: none;                      /* removes Bootstrap shadow */
-        }
-        .title-font {
-            font-family: 'Cal Sans', sans-serif; 
-        }
-        .btn-style {
-            border: 2px solid 	#909878;
-            color: #ffffffff;
-            background-color: #204f2b;
-            padding: 8px 16px;
-            font-size: 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        .btn-style:hover {
-            box-shadow: inset 0 0 0.55em 0em #ffffffff;
-            border-color: #909878;
-            color: #ffffffff;
-            background-color: #909878;
-        }
-
-
-        /* --- Rounded Tab Buttons (no underline) --- */
-        .nav-tabs {
-            position: relative;
-            border-bottom: none !important; /* remove the default border line */
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .nav-tabs .nav-link {
-            border: none !important;       /* remove border underline */
-            color: #333;
-            font-weight: 600;
-            position: relative;
-            background: none;
-            padding: 10px 24px;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-        }
-
-        /* Remove underline for all states */
-        .nav-tabs .nav-link::after {
-            display: none !important;
-        }
-
-        /* Hover effect */
-        .nav-tabs .nav-link:hover {
-            background-color: rgba(32, 79, 43, 0.1); /* light green tint */
-            color: #204f2b;
-            border: none !important;
-        }
-
-        /* Active tab (selected) */
-        .nav-tabs .nav-link.active {
-            background-color: #204f2b;
-            color: #fff !important;
-            border: none !important;
-            border-radius: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
-
-
-        /* --- Simple Highlight Hover Effect --- */
-        .btn-custom {
-            transition: all 0.25s ease;
-            border-radius: 20px;
-            padding: 8px 18px;
-            font-weight: 600;
-        }
-
-        /* Hover: subtle glow and brightness */
-        .btn-custom:hover {
-            filter: brightness(1.15);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-        }
-
-        /* Pressed (click) effect */
-        .btn-custom:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        /* --- Hide all tab content until user clicks a tab --- */
-        .tab-content > .tab-pane {
-            display: none; /* all hidden initially */
-        }
-
-        /* When a tab is clicked, Bootstrap adds .active — show it */
-        .tab-content > .active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-    </style>
+    <link href="style.css" rel="stylesheet">
 </head>
 
 <!-- BODY -->
