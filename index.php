@@ -164,6 +164,13 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
 <!-- BODY -->
 <body>
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen" class="d-flex justify-content-center align-items-center flex-column">
+        <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h2 class="text-light fw-bold" style="font-family: 'Cal Sans', sans-serif;">Employee Management System</h2>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-dark mb-4" style="background-color: #204f2b; padding: 15px 30px;" >
         <div class="container-fluid">

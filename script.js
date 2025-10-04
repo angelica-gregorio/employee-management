@@ -1,10 +1,7 @@
-// Save scroll position before reload
-window.addEventListener("beforeunload", function () {
-  localStorage.setItem("scrollPosition", window.scrollY);
-});
-
-// Restore scroll position on load
-window.addEventListener("load", function () {
-  let scrollPosition = localStorage.getItem("scrollPosition");
-  if (scrollPosition) window.scrollTo(0, parseInt(scrollPosition));
-});
+document.addEventListener("DOMContentLoaded", function() {
+    // Wait for the page to load, then fade out splash
+    setTimeout(() => {
+        const splash = document.getElementById("splash-screen");
+        splash.classList.add("hidden");
+    }, 1800); // 1.8 seconds delay
+  })
