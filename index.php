@@ -145,6 +145,8 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 }
 ?>
 
+    <!------------------------------------------------- HTML PART ---------------------------------------------->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -165,22 +167,37 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
         .card {
             box-shadow: 0 4px 8px rgba(0,0,0,0.08);
             border-radius: 12px;
+            max-width: 1100px;     
+            margin: 50px auto; 
         }
-        table th {
-            background: #ed6c24 !important;
-            color: #fff;
+
+        .table-container th{
+            background: #204f2b ;
+            color: white;
             position: sticky;
             top: 0;
             z-index: 2;
         }
+        .table-container{
+            max-width: 1100px;     
+            margin: 10px auto;
+        }
+        .form-control{
+            background: rgba(255, 254, 254, 0.27);
+            border: none;
+        }
+        .form-control:focus {
+            background: rgba(255, 254, 254, 0.27); /* same as default */
+            outline: none;                         /* removes blue outline */
+            box-shadow: none;                      /* removes Bootstrap shadow */
+        }
         .title-font {
             font-family: 'Cal Sans', sans-serif; 
         }
-        
-        .btn-add-style {
+        .btn-style {
             border: 2px solid 	#909878;
             color: #ffffffff;
-            background-color: 	#909878;
+            background-color: #204f2b;
             padding: 8px 16px;
             font-size: 14px;
             border-radius: 20px;
@@ -188,8 +205,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             transition: all 0.3s ease;
             font-weight: bold;
         }
-
-        .btn-add-style:hover {
+        .btn-style:hover {
             box-shadow: inset 0 0 0.55em 0em #ffffffff;
             border-color: #909878;
             color: #ffffffff;
@@ -197,44 +213,84 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
         }
 
 
-        .btn-ud-style {
-            border: 2px solid 	#a17f7a;
-            color: #ffffffff;
-            background-color: 	#a17f7a;
-            padding: 8px 16px;
-            font-size: 14px;
-            border-radius: 20px;
-            cursor: pointer;
+        /* --- Rounded Tab Buttons (no underline) --- */
+        .nav-tabs {
+            position: relative;
+            border-bottom: none !important; /* remove the default border line */
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-tabs .nav-link {
+            border: none !important;       /* remove border underline */
+            color: #333;
+            font-weight: 600;
+            position: relative;
+            background: none;
+            padding: 10px 24px;
+            border-radius: 30px;
             transition: all 0.3s ease;
-            font-weight: bold;
         }
 
-        .btn-ud-style:hover {
-            box-shadow: inset 0 0 0.55em 0em #ffffffff;
-            border-color: #a17f7a;
-            color: #ffffffff;
-            background-color: #a17f7a;
+        /* Remove underline for all states */
+        .nav-tabs .nav-link::after {
+            display: none !important;
         }
 
-        .btn-delete-style {
-            border: 2px solid 	#3d271a;
-            color: #ffffffff;
-            background-color: 	#3d271a;
-            padding: 8px 16px;
-            font-size: 14px;
+        /* Hover effect */
+        .nav-tabs .nav-link:hover {
+            background-color: rgba(32, 79, 43, 0.1); /* light green tint */
+            color: #204f2b;
+            border: none !important;
+        }
+
+        /* Active tab (selected) */
+        .nav-tabs .nav-link.active {
+            background-color: #204f2b;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+
+        /* --- Simple Highlight Hover Effect --- */
+        .btn-custom {
+            transition: all 0.25s ease;
             border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
+            padding: 8px 18px;
+            font-weight: 600;
         }
 
-        .btn-delete-style:hover {
-            box-shadow: inset 0 0 0.55em 0em #ffffffff;
-            border-color: #3d271a;
-            color: #ffffffff;
-            background-color: #3d271a;
+        /* Hover: subtle glow and brightness */
+        .btn-custom:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
         }
 
+        /* Pressed (click) effect */
+        .btn-custom:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        /* --- Hide all tab content until user clicks a tab --- */
+        .tab-content > .tab-pane {
+            display: none; /* all hidden initially */
+        }
+
+        /* When a tab is clicked, Bootstrap adds .active — show it */
+        .tab-content > .active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
     </style>
 </head>
@@ -242,90 +298,77 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 <!-- BODY -->
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark mb-4" style="background-color: #616651ff;">
+    <nav class="navbar navbar-dark mb-4" style="background-color: #204f2b; padding: 15px 30px;" >
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1 fw-bold title-font">EMPLOYEE  MANAGEMENT  SYSTEM</span>
         </div>
     </nav>
 
+    <!-- Employee Tabs -->
+    <div class="card p-3 mb-4" style="background-color: #eccedaff; max-width: 900px; ">
+        <ul class="nav nav-tabs" id="employeeTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" style="color: #204f2b; font-family: 'Cal Sans', sans-serif;" id="add-tab" data-bs-toggle="tab" data-bs-target="#add" type="button" role="tab">ADD EMPLOYEE</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" style="color: #204f2b; font-family: 'Cal Sans', sans-serif;" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button" role="tab">UPDATE EMPLOYEE</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" style="color: #204f2b; font-family: 'Cal Sans', sans-serif;" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab">DELETE EMPLOYEE</button>
+            </li>
+        </ul>
 
-    <div class="container">
-        <div class="row g-4 mb-4">
-            <!-- Add Employee -->
-            <div class="col-md-4">
-                <div class="card p-3" style="background-color: #fff0e1;">
-                    <h5 class="fw-bold">Add Employee</h5>
-                    <form method="post">
-                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="date" name="shift_date" class="form-control mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <select name="duty_type" class="form-select mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                            <option value="OnDuty">On Duty</option>
-                            <option value="Late">Late</option>
-                            <option value="Overtime">Overtime</option>
-                        </select>
-                        <button type="submit" name="add" class="btn btn-add-style w-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" class="me-1 align-text-bottom">
-                                <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
-                                <rect width="36" height="36" x="5" y="7" rx="3"/>
-                                <path stroke-linecap="round" d="M24 16v16m-8-8h16"/>
-                                </g>
-                            </svg>
-                            Add
-                        </button>
-                    </form>
-                </div>
+        <div class="tab-content pt-3">
+            <!-- Add Form -->
+            <div class="tab-pane fade" id="add" role="tabpanel">
+                <form method="post">
+                    <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required >
+                    <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required >
+                    <input type="date" name="shift_date" class="form-control mb-2" required>
+                    <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required >
+                    <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required >
+                    <select name="duty_type" class="form-select form-control mb-2" required >
+                        <option value="OnDuty">On Duty</option>
+                        <option value="Late">Late</option>
+                        <option value="Overtime">Overtime</option>
+                    </select>
+                    <button type="submit" name="add" class="btn btn-style w-100">Add</button>
+                </form>
             </div>
 
-            <!-- Update Employee -->
-            <div class="col-md-4">
-                <div class="card p-3" style="background-color: #fff0e1;">
-                    <h5 class="fw-bold">Update Employee</h5>
-                    <form method="post">
-                        <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="date" name="shift_date" class="form-control mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <select name="duty_type" class="form-select mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                            <option value="OnDuty">On Duty</option>
-                            <option value="Late">Late</option>
-                            <option value="Overtime">Overtime</option>
-                        </select>
-                        <button type="submit" name="update"  class="btn btn-ud-style w-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2"><path fill="#ffffff" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1c-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29c-3.51 3.48-9.21 3.48-12.72 0c-3.5-3.47-3.53-9.11-.02-12.58s9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08l-.72 1.21L11 13V8h1.5z"/></svg>
-                             Update
-                        </button>
-                    </form>
-                </div>
+            <!-- Update Form -->
+            <div class="tab-pane fade" id="update" role="tabpanel">
+                <form method="post">
+                    <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required>
+                    <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required >
+                    <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required >
+                    <input type="date" name="shift_date" class="form-control mb-2" required >
+                    <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required >
+                    <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required >
+                    <select name="duty_type" class="form-select form-control mb-2" required >
+                        <option value="OnDuty">On Duty</option>
+                        <option value="Late">Late</option>
+                        <option value="Overtime">Overtime</option>
+                    </select>
+                    <button type="submit" name="update" class="btn btn-style w-100">Update</button>
+                </form>
             </div>
 
-            <!-- Delete Employee -->
-            <div class="col-md-4">
-                <div class="card p-3" style="background-color: #fff0e1;">
-                    <h5 class="fw-bold" >Delete Employee</h5>
-                    <form method="post">
-                        <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required style="background: rgba(146, 145, 145, 0.12); border: none;">
-                        <button type="submit" name="delete" class="btn btn-delete-style w-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2 align-text-bottom">
-                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-                                <path d="M5.47 6.015v12.514a2.72 2.72 0 0 0 2.721 2.721h7.618a2.72 2.72 0 0 0 2.72-2.72V6.014m-15.235.001h17.412"/>
-                                <path d="M8.735 6.015V4.382a1.632 1.632 0 0 1 1.633-1.632h3.264a1.632 1.632 0 0 1 1.633 1.632v1.633M9.824 16.992v-5.439m4.353 5.439v-5.439"/>
-                            </g>
-                        </svg>
-                            Delete
-                        </button>
-                    </form>
-                </div>
+            <!-- Delete Form -->
+            <div class="tab-pane fade" id="delete" role="tabpanel">
+                <form method="post">
+                    <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required >
+                    <button type="submit" name="delete" class="btn btn-style w-100">Delete</button>
+                </form>
             </div>
+
         </div>
+    </div>
+
 
         <!-- Search Bar -->
-        <div class="card p-3 mb-4 w-100">
-            <h5 class="fw-bold">Search Employees</h5>
+        <div class="card p-3 mb-4 w-100" style="background-color: #acb39aff; max-width: 1100px; ">
+            <h5 class="fw-bold" style="color: #853354ff; font-family: 'Cal Sans', sans-serif;">SEARCH BAR</h5>
             <form method="post" class="row g-3 align-items-center">
                 <div class="d-flex justify-content-center gap-2">
                     <div class="col-md-3">
@@ -340,10 +383,10 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
                 </div>
                 <div class="col-md-12 text-end">
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="submit" class="btn btn-dark btn-custom">🔍 Search</button>
-                        <button type="submit" name="export_filtered" class="btn btn-warning btn-custom">Export Filtered</button>
-                        <button type="submit" name="export_all" class="btn btn-secondary btn-custom">Export All</button>
-                        <button type="submit" name="view_all" class="btn btn-info btn-custom">View All</button>
+                        <button type="submit" class="btn btn-custom" style="background-color: #b05377; color: white;">Search</button>
+                        <button type="submit" name="export_filtered" class="btn btn-custom" style="background-color: #7d0532; color: white;">Export Filtered</button>
+                        <button type="submit" name="export_all" class="btn btn-custom" style="background-color: #102c20; color: white;">Export All</button>
+                        <button type="submit" name="view_all" class="btn btn-custom" style="background-color: #4f6914; color: white;">View All</button>
                     </div>
                 </div>
             </form>
@@ -351,8 +394,8 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
 <?php if ($show_all) { ?>
         <!-- All Employees -->
-        <h4 class="fw-bold">All Employees</h4>
-        <div class="table-responsive">
+        <h4 class="fw-bold" style="text-align: left; padding-left: 90px;">All Employees</h4>
+        <div class="table-container">
             <table class="table table-striped table-hover align-middle">
                 <thead>
                     <tr>
@@ -389,8 +432,8 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
 
         <!-- Filtered Employees -->
-        <h4 class="fw-bold">Filtered Employees</h4>
-        <div class="table-responsive mb-4">
+        <h4 class="fw-bold" style="text-align: left; padding-left: 90px;">Filtered Employees</h4>
+        <div class="table-container mb-4">
             <table class="table table-striped table-hover align-middle">
                 <thead>
                     <tr>
