@@ -159,7 +159,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #f8f9fa;
+            background: #ece7e8;
             font-family: 'DM Sans', sans-serif;
         }
         .card {
@@ -173,24 +173,68 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
             top: 0;
             z-index: 2;
         }
-        .btn-custom {
-            border-radius: 20px;
-            font-weight: bold;
-        }
         .title-font {
             font-family: 'Cal Sans', sans-serif; 
         }
         
-        .btn-orange {
-            background-color: #f89d32;
-            border-color: #f89d32;
-            color: white; /* optional, ensures text is visible */
+        .btn-add-style {
+            border: 2px solid 	#909878;
+            color: #ffffffff;
+            background-color: 	#909878;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
 
-        .btn-orange:hover {
-            background-color: #d37211ff; /* slightly darker on hover */
-            border-color: #f89d32;
-        }   
+        .btn-add-style:hover {
+            box-shadow: inset 0 0 0.55em 0em #ffffffff;
+            border-color: #909878;
+            color: #ffffffff;
+            background-color: #909878;
+        }
+
+
+        .btn-ud-style {
+            border: 2px solid 	#a17f7a;
+            color: #ffffffff;
+            background-color: 	#a17f7a;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-ud-style:hover {
+            box-shadow: inset 0 0 0.55em 0em #ffffffff;
+            border-color: #a17f7a;
+            color: #ffffffff;
+            background-color: #a17f7a;
+        }
+
+        .btn-delete-style {
+            border: 2px solid 	#3d271a;
+            color: #ffffffff;
+            background-color: 	#3d271a;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-delete-style:hover {
+            box-shadow: inset 0 0 0.55em 0em #ffffffff;
+            border-color: #3d271a;
+            color: #ffffffff;
+            background-color: #3d271a;
+        }
+
 
     </style>
 </head>
@@ -198,7 +242,7 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 <!-- BODY -->
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark mb-4" style="background-color: #f26922;">
+    <nav class="navbar navbar-dark mb-4" style="background-color: #616651ff;">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1 fw-bold title-font">EMPLOYEE  MANAGEMENT  SYSTEM</span>
         </div>
@@ -208,21 +252,21 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     <div class="container">
         <div class="row g-4 mb-4">
             <!-- Add Employee -->
-            <div class="col-md-4" >
-                <div class="card p-3" >
+            <div class="col-md-4">
+                <div class="card p-3" style="background-color: #fff0e1;">
                     <h5 class="fw-bold">Add Employee</h5>
                     <form method="post">
-                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
-                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required>
-                        <input type="date" name="shift_date" class="form-control mb-2" required>
-                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required>
-                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required>
-                        <select name="duty_type" class="form-select mb-2" required>
+                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="date" name="shift_date" class="form-control mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <select name="duty_type" class="form-select mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
                             <option value="OnDuty">On Duty</option>
                             <option value="Late">Late</option>
                             <option value="Overtime">Overtime</option>
                         </select>
-                        <button type="submit" name="add" class="btn btn-success btn-custom w-100">
+                        <button type="submit" name="add" class="btn btn-add-style w-100">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" class="me-1 align-text-bottom">
                                 <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
                                 <rect width="36" height="36" x="5" y="7" rx="3"/>
@@ -237,21 +281,21 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
             <!-- Update Employee -->
             <div class="col-md-4">
-                <div class="card p-3">
+                <div class="card p-3" style="background-color: #fff0e1;">
                     <h5 class="fw-bold">Update Employee</h5>
                     <form method="post">
-                        <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required>
-                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
-                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required>
-                        <input type="date" name="shift_date" class="form-control mb-2" required>
-                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required>
-                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required>
-                        <select name="duty_type" class="form-select mb-2" required>
+                        <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="date" name="shift_date" class="form-control mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <select name="duty_type" class="form-select mb-2" required style="background: rgba(146, 145, 145, 0.12); border: none;">
                             <option value="OnDuty">On Duty</option>
                             <option value="Late">Late</option>
                             <option value="Overtime">Overtime</option>
                         </select>
-                        <button type="submit" name="update"  class="btn btn-orange btn-custom w-100 d-flex align-items-center justify-content-center"  style="background-color: #f89d32; border-color: #f89d32;">
+                        <button type="submit" name="update"  class="btn btn-ud-style w-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2"><path fill="#ffffff" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1c-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29c-3.51 3.48-9.21 3.48-12.72 0c-3.5-3.47-3.53-9.11-.02-12.58s9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08l-.72 1.21L11 13V8h1.5z"/></svg>
                              Update
                         </button>
@@ -261,11 +305,11 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
 
             <!-- Delete Employee -->
             <div class="col-md-4">
-                <div class="card p-3">
-                    <h5 class="fw-bold">Delete Employee</h5>
+                <div class="card p-3" style="background-color: #fff0e1;">
+                    <h5 class="fw-bold" >Delete Employee</h5>
                     <form method="post">
-                        <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required>
-                        <button type="submit" name="delete" class="btn btn-danger btn-custom w-100">
+                        <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required style="background: rgba(146, 145, 145, 0.12); border: none;">
+                        <button type="submit" name="delete" class="btn btn-delete-style w-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="me-2 align-text-bottom">
                             <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
                                 <path d="M5.47 6.015v12.514a2.72 2.72 0 0 0 2.721 2.721h7.618a2.72 2.72 0 0 0 2.72-2.72V6.014m-15.235.001h17.412"/>
