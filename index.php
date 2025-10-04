@@ -1,7 +1,7 @@
 <?php
-// ---------------------------
-// Database connection config
-// ---------------------------
+// ===========================================================
+// Database connection config & session
+// ===========================================================
 $servername = "localhost";
 $username = "root";
 $password = ""; // no password in XAMPP
@@ -9,17 +9,18 @@ $dbname = "employeedetails";
 
 session_start();
 
-// ---------------------------
+// ===========================================================
 // Connect to MySQL database
-// ---------------------------
+// ===========================================================
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// ---------------------------
-// Insert New Employee handler
-// ---------------------------
+// ===========================================================
+// CRUD HANDLERS
+// ===========================================================
+// Insert New Employee
 if (isset($_POST["add"])) {
   $firstName = $_POST["first_name"];
   $lastName = $_POST["last_name"];
@@ -27,29 +28,23 @@ if (isset($_POST["add"])) {
   $shiftNo = (int)$_POST['shift_no'];
   $hours = (int)$_POST['hours'];
   $dutyType = $_POST['duty_type'];
-
   // Data validation: no negative hours or shift number
   if ($hours < 0 || $shiftNo < 0) {
     $_SESSION['toast'] = "❌ Hours and Shift No must not be negative!";
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
   }
-
   $sql = "INSERT INTO employeedetails (FirstName, LastName, ShiftDate, ShiftNo, Hours, DutyType)
       VALUES ('$firstName', '$lastName', '$shiftDate', '$shiftNo', '$hours', '$dutyType')";
-
   if ($conn->query($sql)) {
     $_SESSION['toast'] = "Employee added successfully!";
   } else {
     $_SESSION['toast'] = "❌ Error adding employee!";
   }
-  header("Location: " . $_SERVER['PHP_SELF']); // refresh to show toast
+  header("Location: " . $_SERVER['PHP_SELF']);
   exit;
 }
-
-// ---------------------------
-// Update Employee handler
-// ---------------------------
+// Update Employee
 if (isset($_POST["update"])) {
   $id = $_POST["id"];
   $firstName = $_POST["first_name"];
@@ -58,14 +53,11 @@ if (isset($_POST["update"])) {
   $shiftNo = (int)$_POST['shift_no'];
   $hours = (int)$_POST['hours'];
   $dutyType = $_POST['duty_type'];
-
-  // Data validation: no negative hours or shift number
   if ($hours < 0 || $shiftNo < 0) {
     $_SESSION['toast'] = "❌ Hours and Shift No must not be negative!";
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
   }
-
   $sql = "UPDATE employeedetails
       SET FirstName='$firstName', LastName='$lastName', ShiftDate='$shiftDate',
         ShiftNo='$shiftNo', Hours='$hours', DutyType='$dutyType'
@@ -78,15 +70,11 @@ if (isset($_POST["update"])) {
   header("Location: " . $_SERVER['PHP_SELF']);
   exit;
 }
-
-// ---------------------------
-// Delete Employee handler
-// ---------------------------
+// Delete Employee
 if (isset($_POST["delete"])) {
     $id = $_POST["id"];
     $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
     if ($conn->query($sql)) {
-        // Check if table is now empty, then reset AUTO_INCREMENT
         $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
         $row = $check ? $check->fetch_assoc() : null;
         if ($row && $row['cnt'] == 0) {
@@ -100,70 +88,53 @@ if (isset($_POST["delete"])) {
   exit;
 }
 
-
-
-// Search Query
+// ===========================================================
+// SEARCH, FILTER, EXPORT, AND VIEW LOGIC
+// ===========================================================
 $where = [];
-
 if (!empty($_POST["last_name"])) {
     $search_name = $conn->real_escape_string($_POST["last_name"]);
     $where[] = "(FirstName LIKE '%$search_name%' OR LastName LIKE '%$search_name%')";
 }
-
 if (!empty($_POST["shift_date"])) {
     $search_date = $conn->real_escape_string($_POST["shift_date"]);
     $where[] = "ShiftDate = '$search_date'";
 }
-
 if (!empty($_POST["shift_no"])) {
     $search_no = (int) $_POST["shift_no"];
     $where[] = "ShiftNo = $search_no";
 }
-
-// Base queries
 $sql_all = "SELECT * FROM employeedetails";
 $sql_filtered = $sql_all;
-
 if (!empty($where)) {
     $sql_filtered .= " WHERE " . implode(" AND ", $where);
 }
-
-$result_all = null; // default hidden
+$result_all = null;
 if (isset($_POST["view_all"])) {
     $result_all = $conn->query($sql_all);
 }
-
 $result_filtered = $conn->query($sql_filtered);
-
-// when show all button is clicked
-$show_all = false; // default is filtered employees
-
+$show_all = false;
 if (isset($_POST["view_all"])) {
     $show_all = true;
 }
-
-// Run queries conditionally
 if ($show_all) {
     $result_all = $conn->query($sql_all);
-    $result_filtered = null; // disable filtered
+    $result_filtered = null;
 } else {
     $result_filtered = $conn->query($sql_filtered);
-    $result_all = null; // disable all
+    $result_all = null;
 }
-
-// Export CSV (Filtered or All)
+// Export CSV
 if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
     $export_sql = isset($_POST["export_filtered"]) ? $sql_filtered : $sql_all;
     $exportResult = $conn->query($export_sql);
-
     if ($exportResult->num_rows > 0) {
         $filename = isset($_POST["export_filtered"]) ? "employees_filtered.csv" : "employees_all.csv";
         header('Content-Type: text/csv');
         header("Content-Disposition: attachment;filename=$filename");
-
         $output = fopen("php://output", "w");
         fputcsv($output, ["DataEntryID", "FirstName", "LastName", "ShiftDate", "ShiftNo", "Hours", "DutyType"]);
-
         while ($row = $exportResult->fetch_assoc()) {
             fputcsv($output, $row);
         }
@@ -173,18 +144,15 @@ if (isset($_POST["export_all"]) || isset($_POST["export_filtered"])) {
         echo "<script>alert('No data to export');</script>";
     }
 }
-
 if (isset($_POST['clear_filter'])) {
     unset($_POST['last_name'], $_POST['shift_date'], $_POST['shift_no']);
     $show_all = true;
-    // Force reload with no filters
-  header("Location: " . $_SERVER['PHP_SELF']);
-  exit;
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
 }
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Employee Management</title>
     <!-- Bootstrap 5 -->
@@ -194,9 +162,7 @@ if (isset($_POST['clear_filter'])) {
     <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap" rel="stylesheet">
     <!-- Custom styles moved to style.css -->
 </head>
-
 <body>
-
     <!-- SPLASH SCREEN -->
     <!--
       Splash screen shown on page load. Includes:
@@ -206,15 +172,11 @@ if (isset($_POST['clear_filter'])) {
       The splash screen is hidden via JavaScript after the page loads.
     -->
     <div id="splash-screen" class="d-flex justify-content-center align-items-center flex-column">
-          <!-- Bootstrap spinner for loading effect -->
         <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
-        <!-- Company logo for branding -->
         <img src="office-building.png" alt="Company Logo" style="height:56px;width:auto;margin-bottom:18px;filter: brightness(0) invert(1);">
-        <!-- System title -->
         <h2 class="text-light fw-bold">Employee Management System</h2>
     </div>
-
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary); padding: 15px 30px;">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <span class="navbar-brand mb-0 h1 fw-bold" style="color: var(--text-light);">
@@ -245,13 +207,10 @@ if (isset($_POST['clear_filter'])) {
             </div>
         </div>
     </nav>
-
     <div class="d-flex">
-        <!-- Sidebar -->
-        <!-- Google Material Icons CDN -->
+        <!-- Sidebar (if any) -->
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-        <!-- Main Content: Only Employees Table -->
+        <!-- MAIN CONTENT -->
         <div id="content" class="flex-grow-1 p-4">
             <div id="all">
                 <?php if (!empty($_POST['last_name']) || !empty($_POST['shift_date']) || !empty($_POST['shift_no'])): ?>
@@ -278,23 +237,23 @@ if (isset($_POST['clear_filter'])) {
                 </div>
                 <?php endif; ?>
                 <div class="row mb-3 align-items-center" style="max-width:1100px;margin-left:auto;margin-right:auto;">
-          <div class="col-md-6 d-flex flex-wrap gap-2 align-items-center">
-            <h4 class="fw-bold mb-0" style="display:inline;font-family:'Segoe UI', 'Liberation Sans', 'DejaVu Sans', 'Arial', 'sans-serif';"> 
-              <?= $show_all ? 'All Employees' : 'Filtered Employees' ?>
-            </h4>
-          </div>
-          <div class="col-md-6 d-flex justify-content-md-end justify-content-start mt-2 mt-md-0 align-items-center gap-2">
-            <?php if ($show_all) { ?>
-              <form method="post" class="d-inline ms-2" id="exportAllForm">
-                <button type="submit" name="export_all" class="btn btn-dark">Export All</button>
-              </form>
-            <?php } ?>
-            <?php if (!$show_all) { ?>
-              <form method="post" class="d-inline">
-                <button type="submit" name="view_all" class="btn btn-success">View All</button>
-              </form>
-            <?php } ?>
-          </div>
+                  <div class="col-md-6 d-flex flex-wrap gap-2 align-items-center">
+                    <h4 class="fw-bold mb-0" style="display:inline;font-family:'Segoe UI', 'Liberation Sans', 'DejaVu Sans', 'Arial', 'sans-serif';"> 
+                      <?= $show_all ? 'All Employees' : 'Filtered Employees' ?>
+                    </h4>
+                  </div>
+                  <div class="col-md-6 d-flex justify-content-md-end justify-content-start mt-2 mt-md-0 align-items-center gap-2">
+                    <?php if ($show_all) { ?>
+                      <form method="post" class="d-inline ms-2" id="exportAllForm">
+                        <button type="submit" name="export_all" class="btn btn-dark">Export All</button>
+                      </form>
+                    <?php } ?>
+                    <?php if (!$show_all) { ?>
+                      <form method="post" class="d-inline">
+                        <button type="submit" name="view_all" class="btn btn-success">View All</button>
+                      </form>
+                    <?php } ?>
+                  </div>
                 </div>
                 <table class="employee-table">
                     <thead>
@@ -306,13 +265,24 @@ if (isset($_POST['clear_filter'])) {
                             <th>Shift No</th>
                             <th>Hours</th>
                             <th>Duty Type</th>
+                            <th>Salary (₱)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $data = $show_all ? $result_all : $result_filtered;
+                        $daily_rate = 685;
+                        $hourly_rate = 685/8;
+                        $late_deduction = 100;
                         if ($data && $data->num_rows > 0) {
                             while ($row = $data->fetch_assoc()) {
+                                $hours = floatval($row['Hours']);
+                                $dutyType = strtolower($row['DutyType']);
+                                $salary = $hours >= 8 ? $daily_rate : $hourly_rate * $hours;
+                                if ($dutyType === 'late') {
+                                    $salary -= $late_deduction;
+                                }
+                                if ($salary < 0) $salary = 0;
                                 echo "<tr>
                     <td>{$row['DataEntryID']}</td>
                     <td>{$row['FirstName']}</td>
@@ -321,18 +291,86 @@ if (isset($_POST['clear_filter'])) {
                     <td>{$row['ShiftNo']}</td>
                     <td>{$row['Hours']}</td>
                     <td>{$row['DutyType']}</td>
+                    <td>" . number_format($salary, 2) . "</td>
                 </tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='7' class='text-center text-muted'>No records found</td></tr>";
+                            echo "<tr><td colspan='8' class='text-center text-muted'>No records found</td></tr>";
                         }
                         ?>
                     </tbody>
                 </table>
+                <!-- Salary Computation Platform (Weekly) -->
+                <div class="card mt-4 p-4" style="max-width: 500px; margin: 0 auto; box-shadow: var(--shadow);">
+                  <h5 class="fw-bold mb-3">Compute 1-Week Salary</h5>
+                  <form method="post" class="row g-2 align-items-end">
+                    <div class="col-12">
+                      <label class="form-label mb-1">Daily Rate</label>
+                      <input type="number" name="salary_daily_rate" class="form-control" value="685" readonly>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label mb-1">Hourly Rate</label>
+                      <input type="number" name="salary_hourly_rate" class="form-control" value="85.625" readonly>
+                    </div>
+                    <div class="col-12">
+                      <button type="submit" name="compute_weekly_salary" class="btn btn-primary w-100">Compute Weekly Salary</button>
+                    </div>
+                  </form>
+                  <?php
+                  if (isset($_POST['compute_weekly_salary'])) {
+                    $daily_rate = 685;
+                    $hourly_rate = 685/8;
+                    $late_deduction = 100;
+                    $data = $show_all ? $result_all : $result_filtered;
+                    $total_salary = 0;
+                    $total_days = 0;
+                    $total_late = 0;
+                    $total_hours = 0;
+                    $salary_sql = $show_all ? $sql_all : $sql_filtered;
+                    $salary_result = $conn->query($salary_sql);
+                    $days = [];
+                    while ($row = $salary_result->fetch_assoc()) {
+                      $date = $row['ShiftDate'];
+                      if (!isset($days[$date])) {
+                        $days[$date] = [
+                          'hours' => 0,
+                          'late' => false
+                        ];
+                        $total_days++;
+                      }
+                      $days[$date]['hours'] += floatval($row['Hours']);
+                      if (strtolower($row['DutyType']) === 'late') {
+                        $days[$date]['late'] = true;
+                        $total_late++;
+                      }
+                      $total_hours += floatval($row['Hours']);
+                    }
+                    // Compute salary for each day
+                    foreach ($days as $date => $info) {
+                      $day_salary = $daily_rate;
+                      if ($info['hours'] < 8) {
+                        $day_salary = $hourly_rate * $info['hours'];
+                      }
+                      if ($info['late']) {
+                        $day_salary -= $late_deduction;
+                      }
+                      $total_salary += $day_salary;
+                    }
+                    echo '<div class="alert alert-info mt-3 mb-0">';
+                    echo '<strong>Total Days:</strong> ' . $total_days . '<br>';
+                    echo '<strong>Total Hours:</strong> ' . $total_hours . '<br>';
+                    echo '<strong>Late Days:</strong> ' . $total_late . ' (₱' . ($late_deduction * $total_late) . ' deduction)<br>';
+                    echo '<strong>Daily Rate:</strong> ₱' . number_format($daily_rate, 2) . '<br>';
+                    echo '<strong>Hourly Rate:</strong> ₱' . number_format($hourly_rate, 2) . '<br>';
+                    echo '<strong>Total Salary for 1 Week:</strong> <span style="font-size:1.2em;">₱' . number_format($total_salary, 2) . '</span>';
+                    echo '</div>';
+                  }
+                  ?>
+                </div>
             </div>
         </div>
     </div>
-
+    <!-- MODALS -->
     <!-- Add Modal -->
     <div class="modal fade custom-modal" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
@@ -362,7 +400,6 @@ if (isset($_POST['clear_filter'])) {
         </div>
       </div>
     </div>
-
     <!-- Update Modal -->
     <div class="modal fade custom-modal" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
@@ -390,7 +427,6 @@ if (isset($_POST['clear_filter'])) {
         </div>
       </div>
     </div>
-
     <!-- Delete Modal -->
     <div class="modal fade custom-modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
@@ -408,7 +444,6 @@ if (isset($_POST['clear_filter'])) {
         </div>
       </div>
     </div>
-
     <!-- Search Modal -->
     <div class="modal fade custom-modal" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
@@ -439,7 +474,6 @@ if (isset($_POST['clear_filter'])) {
         </div>
       </div>
     </div>
-
     <!-- Toast -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <?php if (isset($_SESSION['toast'])): ?>
@@ -452,13 +486,10 @@ if (isset($_POST['clear_filter'])) {
             <?php unset($_SESSION['toast']); ?>
         <?php endif; ?>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
-
     <footer class="text-center py-3" style="background: var(--surface); color: var(--primary-dark); font-size: 1.05rem; border-top: 1px solid var(--primary-light); margin-top: 32px;">
       Powered by <strong>Angelica Gregorio</strong> and <strong>Ysabella Santos</strong>
     </footer>
 </body>
-
 </html>
