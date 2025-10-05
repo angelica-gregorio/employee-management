@@ -687,28 +687,7 @@ body.dark-mode .employee-table .text-muted {
   width: 100%;
   z-index: 100;
 }
-/* ---------------- COLOR PALETTE (Light & Dark Mode) ---------------- */
-:root {
-  --green-500: #018256;
-  --green-400: #349B78;
-  --green-300: #67B49A;
-  --green-200: #99CDBB;
-  --green-100: #CCE6DD;
 
-  --primary: #018256;
-  --primary-dark: #349B78;
-  --primary-light: #CCE6DD;
-  --surface: #fff;
-  --background: #fff;
-  --text-light: #fff;
-  --text-dark: #222;
-  --card-bg: #fff;
-  --card-text: #2c3e50;
-  --secondary: #8e24aa;
-  --accent: #f9a825;
-  --shadow: 0 4px 16px rgba(1, 130, 86, 0.08);
-  --transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s, filter 0.3s;
-}
 /* Color coding for Duty Type */
 .dutytype-onduty {
   background: #e6f4ea;
