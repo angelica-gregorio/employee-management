@@ -79,23 +79,44 @@ if (isset($_POST["update"])) {
   exit;
 }
 
+
 // ---------------------------
-// Delete Employee handler
+// Delete Employee handler (single and multi)
 // ---------------------------
 if (isset($_POST["delete"])) {
-    $id = $_POST["id"];
-    $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
-    if ($conn->query($sql)) {
-        // Check if table is now empty, then reset AUTO_INCREMENT
-        $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
-        $row = $check ? $check->fetch_assoc() : null;
-        if ($row && $row['cnt'] == 0) {
-            $conn->query("ALTER TABLE employeedetails AUTO_INCREMENT = 1");
-        }
-        $_SESSION['toast'] = "Employee deleted successfully!";
-    } else {
-        $_SESSION['toast'] = "❌ Error deleting employee!";
+  $id = $_POST["id"];
+  $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
+  if ($conn->query($sql)) {
+    // Check if table is now empty, then reset AUTO_INCREMENT
+    $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
+    $row = $check ? $check->fetch_assoc() : null;
+    if ($row && $row['cnt'] == 0) {
+      $conn->query("ALTER TABLE employeedetails AUTO_INCREMENT = 1");
     }
+    $_SESSION['toast'] = "Employee deleted successfully!";
+  } else {
+    $_SESSION['toast'] = "❌ Error deleting employee!";
+  }
+  header("Location: " . $_SERVER['PHP_SELF']);
+  exit;
+}
+
+// Multi-delete handler
+if (isset($_POST['delete_selected']) && !empty($_POST['selected_ids'])) {
+  $ids = array_map('intval', $_POST['selected_ids']);
+  $idList = implode(',', $ids);
+  $sql = "DELETE FROM employeedetails WHERE DataEntryID IN ($idList)";
+  if ($conn->query($sql)) {
+    // Check if table is now empty, then reset AUTO_INCREMENT
+    $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
+    $row = $check ? $check->fetch_assoc() : null;
+    if ($row && $row['cnt'] == 0) {
+      $conn->query("ALTER TABLE employeedetails AUTO_INCREMENT = 1");
+    }
+    $_SESSION['toast'] = "Selected employees deleted successfully!";
+  } else {
+    $_SESSION['toast'] = "❌ Error deleting selected employees!";
+  }
   header("Location: " . $_SERVER['PHP_SELF']);
   exit;
 }
@@ -196,8 +217,8 @@ if (isset($_POST['clear_filter'])) {
 </head>
 
 <body>
-
-    <!-- SPLASH SCREEN -->
+  <div class="d-flex flex-column min-vh-100">
+  <!-- SPLASH SCREEN -->
     <!--
       Splash screen shown on page load. Includes:
       - Company logo (office-building.png) for branding
@@ -297,38 +318,44 @@ if (isset($_POST['clear_filter'])) {
           </div>
                 </div>
                 <table class="employee-table">
+                <form id="multiDeleteForm" method="post" onsubmit="return confirm('Delete selected employees?');">
+                  <button type="submit" name="delete_selected" class="btn btn-danger mb-2">Delete Selected</button>
+                  <table class="employee-table">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>First</th>
-                            <th>Last</th>
-                            <th>Shift Date</th>
-                            <th>Shift No</th>
-                            <th>Hours</th>
-                            <th>Duty Type</th>
-                        </tr>
+                      <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>ID</th>
+                        <th>First</th>
+                        <th>Last</th>
+                        <th>Shift Date</th>
+                        <th>Shift No</th>
+                        <th>Hours</th>
+                        <th>Duty Type</th>
+                      </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        $data = $show_all ? $result_all : $result_filtered;
-                        if ($data && $data->num_rows > 0) {
-                            while ($row = $data->fetch_assoc()) {
-                                echo "<tr>
-                    <td>{$row['DataEntryID']}</td>
-                    <td>{$row['FirstName']}</td>
-                    <td>{$row['LastName']}</td>
-                    <td>{$row['ShiftDate']}</td>
-                    <td>{$row['ShiftNo']}</td>
-                    <td>{$row['Hours']}</td>
-                    <td>{$row['DutyType']}</td>
-                </tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='7' class='text-center text-muted'>No records found</td></tr>";
+                      <?php
+                      $data = $show_all ? $result_all : $result_filtered;
+                      if ($data && $data->num_rows > 0) {
+                        while ($row = $data->fetch_assoc()) {
+                          echo "<tr>
+                            <td><input type='checkbox' class='row-checkbox' name='selected_ids[]' value='{$row['DataEntryID']}'></td>
+                            <td>{$row['DataEntryID']}</td>
+                            <td>{$row['FirstName']}</td>
+                            <td>{$row['LastName']}</td>
+                            <td>{$row['ShiftDate']}</td>
+                            <td>{$row['ShiftNo']}</td>
+                            <td>{$row['Hours']}</td>
+                            <td>{$row['DutyType']}</td>
+                          </tr>";
                         }
-                        ?>
+                      } else {
+                        echo "<tr><td colspan='8' class='text-center text-muted'>No records found</td></tr>";
+                      }
+                      ?>
                     </tbody>
-                </table>
+                  </table>
+                </form>
             </div>
         </div>
     </div>
@@ -456,9 +483,11 @@ if (isset($_POST['clear_filter'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 
-    <footer class="text-center py-3" style="background: var(--surface); color: var(--primary-dark); font-size: 1.05rem; border-top: 1px solid var(--primary-light); margin-top: 32px;">
+
+    <footer class="text-center py-3 mt-auto sticky-footer" style="background: var(--surface); color: var(--primary-dark); font-size: 1.05rem; border-top: 1px solid var(--primary-light);">
       Powered by <strong>Angelica Gregorio</strong> and <strong>Ysabella Santos</strong>
     </footer>
+    </div>
 </body>
 
 </html>

@@ -1,3 +1,16 @@
+/* No records found row color fix for dark mode */
+body.dark-mode .employee-table .text-muted {
+  color: #bdbdbd !important;
+  background: #23233a !important;
+}
+/* Sticky footer support for flexbox layout */
+.sticky-footer {
+  position: relative;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+}
 /*
 ============================================================
   Employee Management System - Main Stylesheet
@@ -490,3 +503,10 @@ body.dark-mode #darkModeIconSwitch.material-icons {
 }
 
 /* END OF STYLESHEET */
+
+/* ---------------- MODAL CARD DARK MODE ---------------- */
+body.dark-mode .modal-content {
+  background: var(--card-bg) !important;
+  color: var(--card-text) !important;
+  box-shadow: var(--shadow);
+}

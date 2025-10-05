@@ -1,4 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Multi-delete: Select all checkboxes
+  const selectAll = document.getElementById('selectAll');
+  const checkboxes = document.querySelectorAll('.row-checkbox');
+  if (selectAll) {
+    selectAll.addEventListener('change', function () {
+      document.querySelectorAll('.row-checkbox').forEach(cb => {
+        cb.checked = selectAll.checked;
+      });
+    });
+  }
+  // Uncheck selectAll if any row is unchecked
+  document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('row-checkbox')) {
+      if (!e.target.checked && selectAll) selectAll.checked = false;
+      if (selectAll && document.querySelectorAll('.row-checkbox:checked').length === document.querySelectorAll('.row-checkbox').length) {
+        selectAll.checked = true;
+      }
+    }
+  });
   // Splash Screen Logic
   const splash = document.getElementById("splash-screen");
   if (splash) {
