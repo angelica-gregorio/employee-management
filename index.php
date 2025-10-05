@@ -21,29 +21,43 @@ if ($conn->connect_error) {
 // Insert New Employee handler
 // ---------------------------
 if (isset($_POST["add"])) {
-  $firstName = $_POST["first_name"];
-  $lastName = $_POST["last_name"];
-  $shiftDate = $_POST["shift_date"];
-  $shiftNo = (int)$_POST['shift_no'];
-  $hours = (int)$_POST['hours'];
-  $dutyType = $_POST['duty_type'];
-
-  // Data validation: no negative hours or shift number
-  if ($hours < 0 || $shiftNo < 0) {
-    $_SESSION['toast'] = "❌ Hours and Shift No must not be negative!";
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+  $firstNames = $_POST["first_name"];
+  $lastNames = $_POST["last_name"];
+  $shiftDates = $_POST["shift_date"];
+  $shiftNos = $_POST['shift_no'];
+  $hoursArr = $_POST['hours'];
+  $dutyTypes = $_POST['duty_type'];
+  $success = 0;
+  $fail = 0;
+  for ($i = 0; $i < count($firstNames); $i++) {
+    $firstName = $conn->real_escape_string($firstNames[$i]);
+    $lastName = $conn->real_escape_string($lastNames[$i]);
+    $shiftDate = $conn->real_escape_string($shiftDates[$i]);
+    $shiftNo = (int)$shiftNos[$i];
+    $hours = (int)$hoursArr[$i];
+    // Always use 'On Duty' (with space, title case)
+    $dutyType = $conn->real_escape_string(
+      preg_match('/^on\s*duty$/i', trim($dutyTypes[$i])) ? 'On Duty' : $dutyTypes[$i]
+    );
+    if ($hours < 0 || $shiftNo < 0) {
+      $fail++;
+      continue;
+    }
+    $sql = "INSERT INTO employeedetails (FirstName, LastName, ShiftDate, ShiftNo, Hours, DutyType)
+        VALUES ('$firstName', '$lastName', '$shiftDate', '$shiftNo', '$hours', '$dutyType')";
+    if ($conn->query($sql)) {
+      $success++;
+    } else {
+      $fail++;
+    }
   }
-
-  $sql = "INSERT INTO employeedetails (FirstName, LastName, ShiftDate, ShiftNo, Hours, DutyType)
-      VALUES ('$firstName', '$lastName', '$shiftDate', '$shiftNo', '$hours', '$dutyType')";
-
-  if ($conn->query($sql)) {
-    $_SESSION['toast'] = "Employee added successfully!";
-  } else {
-    $_SESSION['toast'] = "❌ Error adding employee!";
+  if ($success > 0) {
+    $_SESSION['toast'] = "$success employee(s) added successfully!";
   }
-  header("Location: " . $_SERVER['PHP_SELF']); // refresh to show toast
+  if ($fail > 0) {
+    $_SESSION['toast'] = (isset($_SESSION['toast']) ? $_SESSION['toast'] . ' ' : '') . "❌ $fail failed to add!";
+  }
+  header("Location: " . $_SERVER['PHP_SELF']);
   exit;
 }
 
@@ -51,29 +65,45 @@ if (isset($_POST["add"])) {
 // Update Employee handler
 // ---------------------------
 if (isset($_POST["update"])) {
-  $id = $_POST["id"];
-  $firstName = $_POST["first_name"];
-  $lastName = $_POST["last_name"];
-  $shiftDate = $_POST["shift_date"];
-  $shiftNo = (int)$_POST['shift_no'];
-  $hours = (int)$_POST['hours'];
-  $dutyType = $_POST['duty_type'];
-
-  // Data validation: no negative hours or shift number
-  if ($hours < 0 || $shiftNo < 0) {
-    $_SESSION['toast'] = "❌ Hours and Shift No must not be negative!";
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+  $ids = (array)$_POST["id"];
+  $firstNames = (array)$_POST["first_name"];
+  $lastNames = (array)$_POST["last_name"];
+  $shiftDates = (array)$_POST["shift_date"];
+  $shiftNos = (array)$_POST['shift_no'];
+  $hoursArr = (array)$_POST['hours'];
+  $dutyTypes = (array)$_POST['duty_type'];
+  $success = 0;
+  $fail = 0;
+  for ($i = 0; $i < count($ids); $i++) {
+    $id = (int)$ids[$i];
+    $firstName = $conn->real_escape_string($firstNames[$i]);
+    $lastName = $conn->real_escape_string($lastNames[$i]);
+    $shiftDate = $conn->real_escape_string($shiftDates[$i]);
+    $shiftNo = (int)$shiftNos[$i];
+    $hours = (int)$hoursArr[$i];
+    // Always use 'On Duty' (with space, title case)
+    $dutyType = $conn->real_escape_string(
+      preg_match('/^on\s*duty$/i', trim($dutyTypes[$i])) ? 'On Duty' : $dutyTypes[$i]
+    );
+    if ($hours < 0 || $shiftNo < 0) {
+      $fail++;
+      continue;
+    }
+    $sql = "UPDATE employeedetails
+        SET FirstName='$firstName', LastName='$lastName', ShiftDate='$shiftDate',
+          ShiftNo='$shiftNo', Hours='$hours', DutyType='$dutyType'
+        WHERE DataEntryID='$id'";
+    if ($conn->query($sql)) {
+      $success++;
+    } else {
+      $fail++;
+    }
   }
-
-  $sql = "UPDATE employeedetails
-      SET FirstName='$firstName', LastName='$lastName', ShiftDate='$shiftDate',
-        ShiftNo='$shiftNo', Hours='$hours', DutyType='$dutyType'
-      WHERE DataEntryID='$id'";
-  if ($conn->query($sql)) {
-    $_SESSION['toast'] = "Employee updated successfully!";
-  } else {
-    $_SESSION['toast'] = "❌ Error updating employee!";
+  if ($success > 0) {
+    $_SESSION['toast'] = "$success employee(s) updated successfully!";
+  }
+  if ($fail > 0) {
+    $_SESSION['toast'] = (isset($_SESSION['toast']) ? $_SESSION['toast'] . ' ' : '') . "❌ $fail failed to update!";
   }
   header("Location: " . $_SERVER['PHP_SELF']);
   exit;
@@ -84,18 +114,29 @@ if (isset($_POST["update"])) {
 // Delete Employee handler (single and multi)
 // ---------------------------
 if (isset($_POST["delete"])) {
-  $id = $_POST["id"];
-  $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
-  if ($conn->query($sql)) {
-    // Check if table is now empty, then reset AUTO_INCREMENT
-    $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
-    $row = $check ? $check->fetch_assoc() : null;
-    if ($row && $row['cnt'] == 0) {
-      $conn->query("ALTER TABLE employeedetails AUTO_INCREMENT = 1");
+  $ids = (array)$_POST["id"];
+  $success = 0;
+  $fail = 0;
+  foreach ($ids as $id) {
+    $id = (int)$id;
+    $sql = "DELETE FROM employeedetails WHERE DataEntryID='$id'";
+    if ($conn->query($sql)) {
+      $success++;
+    } else {
+      $fail++;
     }
-    $_SESSION['toast'] = "Employee deleted successfully!";
-  } else {
-    $_SESSION['toast'] = "❌ Error deleting employee!";
+  }
+  // Check if table is now empty, then reset AUTO_INCREMENT
+  $check = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails");
+  $row = $check ? $check->fetch_assoc() : null;
+  if ($row && $row['cnt'] == 0) {
+    $conn->query("ALTER TABLE employeedetails AUTO_INCREMENT = 1");
+  }
+  if ($success > 0) {
+    $_SESSION['toast'] = "$success employee(s) deleted successfully!";
+  }
+  if ($fail > 0) {
+    $_SESSION['toast'] = (isset($_SESSION['toast']) ? $_SESSION['toast'] . ' ' : '') . "❌ $fail failed to delete!";
   }
   header("Location: " . $_SERVER['PHP_SELF']);
   exit;
@@ -157,10 +198,17 @@ if (isset($_POST["view_all"])) {
 $result_filtered = $conn->query($sql_filtered);
 
 // when show all button is clicked
-$show_all = false; // default is filtered employees
 
+// Default: show all employees unless a filter is applied
+$show_all = true;
+
+
+// If any filter is applied, show filtered employees
+if (!empty($_POST["last_name"]) || !empty($_POST["shift_date"]) || !empty($_POST["shift_no"])) {
+  $show_all = false;
+}
 if (isset($_POST["view_all"])) {
-    $show_all = true;
+  $show_all = true;
 }
 
 // Run queries conditionally
@@ -267,6 +315,56 @@ if (isset($_POST['clear_filter'])) {
         </div>
     </nav>
 
+    <!-- DASHBOARD DATE FILTER & CARDS -->
+    <div class="dashboard-outer my-4">
+      <form method="get" class="mb-3 d-flex flex-wrap align-items-center justify-content-center gap-2 dashboard-filter-form">
+        <label for="dashboard_date" class="fw-bold me-2">Dashboard Date:</label>
+        <input type="date" id="dashboard_date" name="dashboard_date" class="form-control" style="max-width:180px;" value="<?= isset($_GET['dashboard_date']) ? htmlspecialchars($_GET['dashboard_date']) : '' ?>">
+        <button type="submit" class="btn btn-outline-primary">Apply</button>
+        <?php if (isset($_GET['dashboard_date']) && $_GET['dashboard_date']): ?>
+          <a href="index.php" class="btn btn-link">Clear</a>
+        <?php endif; ?>
+      </form>
+      <div class="row g-3 justify-content-center dashboard-row">
+        <?php
+          $dateFilter = isset($_GET['dashboard_date']) && $_GET['dashboard_date'] ?
+            (" AND ShiftDate='" . $conn->real_escape_string($_GET['dashboard_date']) . "'") : '';
+          $totalEmployees = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails WHERE 1 $dateFilter")->fetch_assoc()['cnt'];
+          $totalLate = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails WHERE DutyType='Late' $dateFilter")->fetch_assoc()['cnt'];
+          $totalOvertime = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails WHERE DutyType='Overtime' $dateFilter")->fetch_assoc()['cnt'];
+          $totalOnDuty = $conn->query("SELECT COUNT(*) as cnt FROM employeedetails WHERE DutyType='On Duty' $dateFilter")->fetch_assoc()['cnt'];
+        ?>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm text-center py-3 dashboard-card">
+            <span class="material-icons mb-1" style="font-size:2.2em;color:#018256;">group</span>
+            <div class="fw-bold" style="font-size:1.3em;">Total Entries</div>
+            <div class="fs-4"><?= $totalEmployees ?></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm text-center py-3 dashboard-card">
+            <span class="material-icons mb-1" style="font-size:2.2em;color:#d32f2f;">schedule</span>
+            <div class="fw-bold" style="font-size:1.3em;">Total Late</div>
+            <div class="fs-4"><?= $totalLate ?></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm text-center py-3 dashboard-card">
+            <span class="material-icons mb-1" style="font-size:2.2em;color:#1565c0;">alarm</span>
+            <div class="fw-bold" style="font-size:1.3em;">Total Overtime</div>
+            <div class="fs-4"><?= $totalOvertime ?></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm text-center py-3 dashboard-card">
+            <span class="material-icons mb-1" style="font-size:2.2em;color:#018256;">verified_user</span>
+            <div class="fw-bold" style="font-size:1.3em;">On Duty</div>
+            <div class="fs-4"><?= $totalOnDuty ?></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex">
         <!-- Sidebar -->
         <!-- Google Material Icons CDN -->
@@ -276,7 +374,7 @@ if (isset($_POST['clear_filter'])) {
         <div id="content" class="flex-grow-1 p-4">
             <div id="all">
                 <?php if (!empty($_POST['last_name']) || !empty($_POST['shift_date']) || !empty($_POST['shift_no'])): ?>
-                <div class="search-query-card mb-2" id="search-query-card">
+                <div class="search-query-card mb-2" id="search-query-card" style="max-width:1100px;margin-left:auto;margin-right:auto;min-width:400px;width:90%;">
                     <?php if (!empty($_POST['last_name'])): ?>
                         <span class="search-query-chip">Name: <?= htmlspecialchars($_POST['last_name']) ?></span>
                     <?php endif; ?>
@@ -317,9 +415,8 @@ if (isset($_POST['clear_filter'])) {
             <?php } ?>
           </div>
                 </div>
-                <table class="employee-table">
+                <div class="table-responsive">
                 <form id="multiDeleteForm" method="post" onsubmit="return confirm('Delete selected employees?');">
-                  <button type="submit" name="delete_selected" class="btn btn-danger mb-2">Delete Selected</button>
                   <table class="employee-table">
                     <thead>
                       <tr>
@@ -338,6 +435,15 @@ if (isset($_POST['clear_filter'])) {
                       $data = $show_all ? $result_all : $result_filtered;
                       if ($data && $data->num_rows > 0) {
                         while ($row = $data->fetch_assoc()) {
+                          $dutyType = $row['DutyType'];
+                          $dutyClass = '';
+                          if (strcasecmp($dutyType, 'On Duty') === 0) {
+                            $dutyClass = 'dutytype-onduty';
+                          } elseif (strcasecmp($dutyType, 'Late') === 0) {
+                            $dutyClass = 'dutytype-late';
+                          } elseif (strcasecmp($dutyType, 'Overtime') === 0) {
+                            $dutyClass = 'dutytype-overtime';
+                          }
                           echo "<tr>
                             <td><input type='checkbox' class='row-checkbox' name='selected_ids[]' value='{$row['DataEntryID']}'></td>
                             <td>{$row['DataEntryID']}</td>
@@ -346,7 +452,7 @@ if (isset($_POST['clear_filter'])) {
                             <td>{$row['ShiftDate']}</td>
                             <td>{$row['ShiftNo']}</td>
                             <td>{$row['Hours']}</td>
-                            <td>{$row['DutyType']}</td>
+                            <td><span class='$dutyClass'>{$row['DutyType']}</span></td>
                           </tr>";
                         }
                       } else {
@@ -355,14 +461,18 @@ if (isset($_POST['clear_filter'])) {
                       ?>
                     </tbody>
                   </table>
+                  <div class="mt-2" style="max-width:1100px;margin-left:auto;margin-right:auto;">
+                    <button type="submit" name="delete_selected" class="btn btn-danger">Delete Selected</button>
+                  </div>
                 </form>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Add Modal -->
     <div class="modal fade custom-modal" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="addModalLabel">Add Employee</h5>
@@ -370,17 +480,24 @@ if (isset($_POST['clear_filter'])) {
           </div>
           <div class="modal-body">
             <form method="post" id="addForm">
-              <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
-              <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required>
-              <input type="date" name="shift_date" class="form-control mb-2" required>
-              <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required>
-              <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required>
-              <select name="duty_type" class="form-select mb-2" required>
-                <option value="OnDuty">On Duty</option>
-                <option value="Late">Late</option>
-                <option value="Overtime">Overtime</option>
-              </select>
-              <button type="submit" name="add" class="btn btn-primary w-100">Add</button>
+              <div id="addFields">
+                <div class="add-row mb-3 border-bottom pb-2">
+                  <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
+                  <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
+                  <input type="date" name="shift_date[]" class="form-control mb-2" required>
+                  <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
+                  <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
+                  <select name="duty_type[]" class="form-select mb-2" required>
+                    <option value="On Duty">On Duty</option>
+                    <option value="Late">Late</option>
+                    <option value="Overtime">Overtime</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-success w-100 mb-2" id="addMoreBtn">Add More</button>
+              <div class="d-grid gap-2 mt-2">
+                <button type="submit" name="add" class="btn btn-primary">Add</button>
+              </div>
             </form>
             <div class="text-center mt-3">
               <a href="#" id="updateInsteadLink" class="forgot-link">Update instead?</a>
@@ -392,27 +509,37 @@ if (isset($_POST['clear_filter'])) {
 
     <!-- Update Modal -->
     <div class="modal fade custom-modal" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="updateModalLabel">Update Employee</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form method="post">
-              <input type="number" name="id" class="form-control mb-2" placeholder="Data Entry ID" required>
-              <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name" required>
-              <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name" required>
-              <input type="date" name="shift_date" class="form-control mb-2" required>
-              <input type="number" name="shift_no" class="form-control mb-2" placeholder="Shift No" required>
-              <input type="number" name="hours" class="form-control mb-2" placeholder="Hours" required>
-              <select name="duty_type" class="form-select mb-2" required>
-                <option value="OnDuty">On Duty</option>
-                <option value="Late">Late</option>
-                <option value="Overtime">Overtime</option>
-              </select>
-              <button type="submit" name="update" class="btn btn-warning w-100">Update</button>
+            <form method="post" id="updateForm">
+              <div id="updateFields">
+                <div class="update-row mb-3 border-bottom pb-2">
+                  <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
+                  <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
+                  <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
+                  <input type="date" name="shift_date[]" class="form-control mb-2" required>
+                  <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
+                  <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
+                  <select name="duty_type[]" class="form-select mb-2" required>
+                    <option value="OnDuty">On Duty</option>
+                    <option value="Late">Late</option>
+                    <option value="Overtime">Overtime</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-warning w-100 mb-2" id="updateMoreBtn">Update More</button>
+              <div class="d-grid gap-2 mt-2">
+                <button type="submit" name="update" class="btn btn-warning">Update</button>
+              </div>
             </form>
+            <div class="text-center mt-3">
+              <a href="#" id="addInsteadLink" class="forgot-link">Add instead?</a>
+            </div>
           </div>
         </div>
       </div>
@@ -420,15 +547,20 @@ if (isset($_POST['clear_filter'])) {
 
     <!-- Delete Modal -->
     <div class="modal fade custom-modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" style="max-width: 370px;">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="deleteModalLabel">Delete Employee</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form method="post">
-              <input type="number" name="id" class="form-control mb-3" placeholder="Data Entry ID" required>
+            <form method="post" id="deleteForm">
+              <div id="deleteFields">
+                <div class="delete-row mb-3 border-bottom pb-2">
+                  <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-danger w-100 mb-2" id="deleteMoreBtn">Delete More</button>
               <button type="submit" name="delete" class="btn btn-danger w-100">Delete</button>
             </form>
           </div>
@@ -480,8 +612,71 @@ if (isset($_POST['clear_filter'])) {
         <?php endif; ?>
     </div>
 
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <script>
+    // Add More for Add Modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const addMoreBtn = document.getElementById('addMoreBtn');
+      if (addMoreBtn) {
+        addMoreBtn.addEventListener('click', function() {
+          const addFields = document.getElementById('addFields');
+          const row = document.createElement('div');
+          row.className = 'add-row mb-3 border-bottom pb-2';
+          row.innerHTML = `
+            <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
+            <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
+            <input type="date" name="shift_date[]" class="form-control mb-2" required>
+            <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
+            <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
+            <select name="duty_type[]" class="form-select mb-2" required>
+              <option value="OnDuty">On Duty</option>
+              <option value="Late">Late</option>
+              <option value="Overtime">Overtime</option>
+            </select>
+          `;
+          addFields.appendChild(row);
+        });
+      }
+      // Update More for Update Modal
+      const updateMoreBtn = document.getElementById('updateMoreBtn');
+      if (updateMoreBtn) {
+        updateMoreBtn.addEventListener('click', function() {
+          const updateFields = document.getElementById('updateFields');
+          const row = document.createElement('div');
+          row.className = 'update-row mb-3 border-bottom pb-2';
+          row.innerHTML = `
+            <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
+            <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
+            <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
+            <input type="date" name="shift_date[]" class="form-control mb-2" required>
+            <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
+            <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
+            <select name="duty_type[]" class="form-select mb-2" required>
+              <option value="OnDuty">On Duty</option>
+              <option value="Late">Late</option>
+              <option value="Overtime">Overtime</option>
+            </select>
+          `;
+          updateFields.appendChild(row);
+        });
+      }
+      // Delete More for Delete Modal
+      const deleteMoreBtn = document.getElementById('deleteMoreBtn');
+      if (deleteMoreBtn) {
+        deleteMoreBtn.addEventListener('click', function() {
+          const deleteFields = document.getElementById('deleteFields');
+          const row = document.createElement('div');
+          row.className = 'delete-row mb-3 border-bottom pb-2';
+          row.innerHTML = `
+            <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
+          `;
+          deleteFields.appendChild(row);
+        });
+      }
+    });
+    </script>
 
 
     <footer class="text-center py-3 mt-auto sticky-footer" style="background: var(--surface); color: var(--primary-dark); font-size: 1.05rem; border-top: 1px solid var(--primary-light);">

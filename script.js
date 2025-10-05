@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Multi-delete: Select all checkboxes
   const selectAll = document.getElementById('selectAll');
-  const checkboxes = document.querySelectorAll('.row-checkbox');
   if (selectAll) {
     selectAll.addEventListener('change', function () {
       document.querySelectorAll('.row-checkbox').forEach(cb => {
@@ -18,7 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
-  // Splash Screen Logic
+
+  // Splash Screen Logic (with failsafe)
   const splash = document.getElementById("splash-screen");
   if (splash) {
     if (!localStorage.getItem("splashShown")) {
@@ -29,6 +29,10 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       splash.classList.add("hidden");
     }
+    // Failsafe: always hide splash after 2 seconds
+    setTimeout(() => {
+      splash.classList.add("hidden");
+    }, 2000);
   }
 
   // Dark Mode Toggle (icon only)
@@ -74,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Update Instead Link (Add -> Update Modal)
+  // Modal Switchers
   const updateInsteadLink = document.getElementById('updateInsteadLink');
   if (updateInsteadLink) {
     updateInsteadLink.addEventListener('click', function (e) {
@@ -83,6 +87,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (addModal) addModal.hide();
       const updateModal = new bootstrap.Modal(document.getElementById('updateModal'));
       updateModal.show();
+    });
+  }
+  const addInsteadLink = document.getElementById('addInsteadLink');
+  if (addInsteadLink) {
+    addInsteadLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      const updateModal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
+      if (updateModal) updateModal.hide();
+      const addModal = new bootstrap.Modal(document.getElementById('addModal'));
+      addModal.show();
     });
   }
 
