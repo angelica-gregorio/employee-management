@@ -1,4 +1,33 @@
 <?php
+/*
+============================================================
+  Employee Management System - index.php
+  ---------------------------------------------------------
+  Main PHP file for the Employee Management System web app.
+  Handles all backend logic, dashboard, and UI rendering.
+
+  CLASS & SECTION DOCUMENTATION:
+  -----------------------------
+  - Database connection: Sets up MySQL connection.
+  - Insert/Update/Delete Handlers: Process form submissions for CRUD.
+  - Search & Filtering: Handles employee search/filter logic.
+  - Dashboard: Renders dashboard cards with employee stats.
+  - Modals: Bootstrap modals for Add, Update, Delete, Search.
+  - Table: Displays employee records with color-coded duty types.
+  - JavaScript: Handles dynamic modal field addition and UI logic.
+
+  MAIN CLASSES (CSS):
+  -------------------
+  - dashboard-card: Card for dashboard stats (light/dark mode styled)
+  - employee-table: Main employee data table, responsive
+  - dutytype-onduty/late/overtime: Color-coded duty type badges
+  - custom-modal: Bootstrap modal overrides for app modals
+  - sticky-footer: Footer that sticks to bottom
+  - search-query-card/chip: UI for active search filters
+  - ...see style.css for more
+============================================================
+*/
+
 // ---------------------------
 // Database connection config
 // ---------------------------
@@ -27,6 +56,7 @@ if (isset($_POST["add"])) {
   $shiftNos = $_POST['shift_no'];
   $hoursArr = $_POST['hours'];
   $dutyTypes = $_POST['duty_type'];
+
   $success = 0;
   $fail = 0;
   for ($i = 0; $i < count($firstNames); $i++) {
@@ -255,13 +285,13 @@ if (isset($_POST['clear_filter'])) {
 <html>
 
 <head>
+  <!-- Google Fonts: Google Sans (Product Sans) -->
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <title>Employee Management</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
-    <!-- Google Fonts: Poppins (Material recommended) -->
-    <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700&display=swap" rel="stylesheet">
-    <!-- Custom styles moved to style.css -->
+  <!-- Custom styles moved to style.css -->
 </head>
 
 <body>
@@ -366,7 +396,6 @@ if (isset($_POST['clear_filter'])) {
     </div>
 
     <div class="d-flex">
-        <!-- Sidebar -->
         <!-- Google Material Icons CDN -->
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -615,68 +644,6 @@ if (isset($_POST['clear_filter'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
-    <script>
-    // Add More for Add Modal
-    document.addEventListener('DOMContentLoaded', function() {
-      const addMoreBtn = document.getElementById('addMoreBtn');
-      if (addMoreBtn) {
-        addMoreBtn.addEventListener('click', function() {
-          const addFields = document.getElementById('addFields');
-          const row = document.createElement('div');
-          row.className = 'add-row mb-3 border-bottom pb-2';
-          row.innerHTML = `
-            <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
-            <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
-            <input type="date" name="shift_date[]" class="form-control mb-2" required>
-            <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
-            <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
-            <select name="duty_type[]" class="form-select mb-2" required>
-              <option value="OnDuty">On Duty</option>
-              <option value="Late">Late</option>
-              <option value="Overtime">Overtime</option>
-            </select>
-          `;
-          addFields.appendChild(row);
-        });
-      }
-      // Update More for Update Modal
-      const updateMoreBtn = document.getElementById('updateMoreBtn');
-      if (updateMoreBtn) {
-        updateMoreBtn.addEventListener('click', function() {
-          const updateFields = document.getElementById('updateFields');
-          const row = document.createElement('div');
-          row.className = 'update-row mb-3 border-bottom pb-2';
-          row.innerHTML = `
-            <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
-            <input type="text" name="first_name[]" class="form-control mb-2" placeholder="First Name" required>
-            <input type="text" name="last_name[]" class="form-control mb-2" placeholder="Last Name" required>
-            <input type="date" name="shift_date[]" class="form-control mb-2" required>
-            <input type="number" name="shift_no[]" class="form-control mb-2" placeholder="Shift No" required>
-            <input type="number" name="hours[]" class="form-control mb-2" placeholder="Hours" required>
-            <select name="duty_type[]" class="form-select mb-2" required>
-              <option value="OnDuty">On Duty</option>
-              <option value="Late">Late</option>
-              <option value="Overtime">Overtime</option>
-            </select>
-          `;
-          updateFields.appendChild(row);
-        });
-      }
-      // Delete More for Delete Modal
-      const deleteMoreBtn = document.getElementById('deleteMoreBtn');
-      if (deleteMoreBtn) {
-        deleteMoreBtn.addEventListener('click', function() {
-          const deleteFields = document.getElementById('deleteFields');
-          const row = document.createElement('div');
-          row.className = 'delete-row mb-3 border-bottom pb-2';
-          row.innerHTML = `
-            <input type="number" name="id[]" class="form-control mb-2" placeholder="Data Entry ID" required>
-          `;
-          deleteFields.appendChild(row);
-        });
-      }
-    });
-    </script>
 
 
     <footer class="text-center py-3 mt-auto sticky-footer" style="background: var(--surface); color: var(--primary-dark); font-size: 1.05rem; border-top: 1px solid var(--primary-light);">

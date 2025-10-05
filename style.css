@@ -1,47 +1,63 @@
-/* Dashboard Card Dark Mode */
+/*
+============================================================
+  Employee Management System - Main Stylesheet
+  ---------------------------------------------------------
+  - Modern Light & Dark Mode Palette
+  - Responsive, accessible, and maintainable
+  - All custom styles for layout, forms, table, navbar, etc.
+  - Bootstrap is used for base components, but custom styles override as needed
+  - Last updated: 2025-10-05
+  - Font: Google Sans (Google Fonts) with SF Pro fallback
+============================================================
+  HOW TO CUSTOMIZE:
+  - Change colors: See :root and body.dark-mode for palette variables
+  - Change font: Edit @import and font-family in GLOBAL TYPOGRAPHY
+  - Dashboard card style: See .dashboard-card and body.dark-mode .dashboard-card
+  - Table style: See .employee-table and related selectors
+  - Button style: See .btn-style, .btn-custom, and Bootstrap overrides
+  - Modal style: See .modal-content and dark mode section
+  - Duty type badge colors: See .dutytype-onduty, .dutytype-late, .dutytype-overtime
+  - Navbar/footer: See .navbar, .sticky-footer
+  - Splash screen: See #splash-screen
+  - Dark mode: See body.dark-mode and related selectors
+============================================================
+*/
+
+/* ---------------- DASHBOARD CARDS & FILTERS ---------------- */
+/* Dashboard Card Dark Mode - change background, text, and icon color for dashboard cards in dark mode */
 body.dark-mode .dashboard-card {
-  background: #23233a !important;
-  color: #e0e0e0 !important;
+  background: #23233a !important; /* Card background in dark mode */
+  color: #e0e0e0 !important;      /* Card text color in dark mode */
   box-shadow: 0 2px 16px rgba(1,130,86,0.18);
   border: 1px solid #33364a;
 }
 body.dark-mode .dashboard-card .material-icons {
-  color: #ffd54f !important;
+  color: #ffd54f !important;      /* Icon color in dark mode */
   filter: drop-shadow(0 2px 8px #01825644);
 }
 body.dark-mode .dashboard-card .fw-bold,
 body.dark-mode .dashboard-card .fs-4 {
   color: #fff !important;
 }
-/* Ergonomic dashboard width to match employee table */
+/* Dashboard container width - matches employee table for ergonomic layout */
 .dashboard-outer {
   max-width: 1100px;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
 }
+/* Dashboard row grid */
 .dashboard-row {
   margin-left: 0;
   margin-right: 0;
 }
+/* Dashboard date filter form */
 .dashboard-filter-form {
   max-width: 1100px;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
 }
-/*
-============================================================
-  Employee Management System - Main Stylesheet
-  - Modern Light & Dark Mode Palette
-  - Responsive, accessible, and maintainable
-  - All custom styles for layout, forms, table, navbar, etc.
-  - Bootstrap is used for base components, but custom styles override as needed
-  - Last updated: 2025-10-05
-  - Font: Zalando Sans (Google Fonts) with SF Pro fallback
-============================================================
-*/
-
 
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
 
@@ -530,7 +546,7 @@ body.dark-mode .modal-content {
   padding: 4px 10px;
   display: inline-block;
 }body, .card, .form-control, .btn, .btn-style, .btn-custom, .employee-search-input, .employee-search-clear, .navbar, .modal-content {
-  font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', 'Roboto', 'Poppins', Arial, sans-serif !important;
+  font-family: 'Google Sans', 'SF Pro', 'San Francisco', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', Arial, sans-serif !important;
   transition: var(--transition, background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s, filter 0.3s);
 }
 .dutytype-late {
